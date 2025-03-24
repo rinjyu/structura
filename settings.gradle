@@ -1,0 +1,11 @@
+rootProject.name = 'structura'
+
+include 'structura-core'
+include 'structura-command'
+include 'structura-query'
+include 'structura-repository'
+include 'structura-repository:structura-repository-mongodb'
+include 'structura-repository:structura-repository-redis'
+include 'structura-config'
+include 'structura-docker'
+include 'structura-kafka'

@@ -1,0 +1,16 @@
+plugins {
+	id 'java'
+}
+
+allprojects {
+	group = 'com.structura'
+	version = '1.0.0'
+
+	repositories {
+		mavenCentral()
+	}
+}
+
+subprojects {
+	apply plugin: 'java'
+}
