@@ -1,0 +1,122 @@
+version: "3.8"
+
+services:
+  # ✅ Config 서버
+  mongo-configserver:
+    image: mongo:8.0.6
+    container_name: mongo-configserver
+    command: [ "mongod", "--configsvr", "--replSet", "configReplSet", "--port", "27019" ]
+    ports:
+      - "27019:27019"
+    volumes:
+      - ./mongo-data/config:/data/db
+    networks:
+      - structura-network
+
+  # ✅ Shard 1 (샤드 노드)
+  mongo-shard1:
+    image: mongo:8.0.6
+    container_name: mongo-shard1
+    command: [ "mongod", "--shardsvr", "--replSet", "shard1ReplSet", "--port", "27018" ]
+    ports:
+      - "27018:27018"
+    volumes:
+      - ./mongo-data/shard1:/data/db
+    networks:
+      - structura-network
+    depends_on:
+      - mongo-configserver
+
+  # ✅ Shard 2 (샤드 노드)
+  mongo-shard2:
+    image: mongo:8.0.6
+    container_name: mongo-shard2
+    command: [ "mongod", "--shardsvr", "--replSet", "shard2ReplSet", "--port", "27020" ]
+    ports:
+      - "27020:27020"
+    volumes:
+      - ./mongo-data/shard2:/data/db
+    networks:
+      - structura-network
+    depends_on:
+      - mongo-configserver
+
+  # ✅ Mongos (라우터)
+  mongo-mongos:
+    image: mongo:8.0.6
+    container_name: mongo-router
+    command: [ "mongos", "--configdb", "configReplSet/mongo-configserver:27019", "--bind_ip_all" ]
+    ports:
+      - "27017:27017"
+    depends_on:
+      - mongo-configserver
+      - mongo-shard1
+      - mongo-shard2
+    networks:
+      - structura-network
+
+  # ✅ MongoDB 샤드 초기화
+  mongo-init:
+    image: mongo:8.0.6
+    container_name: mongo-init
+    restart: "no"
+    volumes:
+      - ./mongodb-init:/docker-entrypoint-initdb.d
+    depends_on:
+      - mongo-mongos
+    entrypoint: >
+      bash -c "
+      echo '⏳ Waiting for MongoDB to be ready...';
+      until mongosh --host mongo-router --eval 'db.runCommand({ ping: 1 })'; do
+        sleep 5;
+      done;
+      echo '✅ MongoDB is ready!';
+      mongosh --host mongo-router --file /docker-entrypoint-initdb.d/init-user.js;
+      mongosh --host mongo-router --file /docker-entrypoint-initdb.d/init-shard.js;
+      "
+    networks:
+      - structura-network
+
+  # ✅ Kafka 클러스터 - Zookeeper
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: kafka-zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    ports:
+      - "2181:2181"
+    networks:
+      - structura-network
+
+  # ✅ Kafka Broker
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka-broker
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "9092:9092"
+    networks:
+      - structura-network
+
+  # ✅ Redis (단일 노드)
+  redis:
+    image: redis:latest
+    container_name: redis
+    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis-data:/data
+      - ./redis-config/redis.conf:/usr/local/etc/redis/redis.conf
+    networks:
+      - structura-network
+
+networks:
+  structura-network:
+    driver: bridge
