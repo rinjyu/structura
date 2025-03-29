@@ -1,1 +1,26 @@
-spring.application.name=structura-repository-redis
+spring:
+  application:
+    name: structura-repository-redis
+  profiles:
+    active: ${spring.profiles.active:default}
+  docker:
+    compose:
+      file: D:\workspace\project\structura\structura-docker\docker-compose.yml
+
+---
+spring:
+  config:
+    activate:
+      on-profile: default
+  data:
+    redis:
+      host: redis
+      port: 6379
+      password: structura
+      timeout: 2000
+      jedis:
+        pool:
+          max-active: 10
+          max-idle: 5
+          min-idle: 1
+          max-wait: -1

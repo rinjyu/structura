@@ -1,1 +1,6 @@
-spring.application.name=structura-kafka
+spring:
+  application:
+    name: structura-kafka
+  docker:
+    compose:
+      file: D:\workspace\project\structura\structura-docker\docker-compose.yml

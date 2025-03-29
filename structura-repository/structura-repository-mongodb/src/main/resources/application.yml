@@ -1,1 +1,17 @@
-spring.application.name=structura-repository-mongodb
+spring:
+  application:
+    name: structura-repository-mongodb
+  profiles:
+    active: ${spring.profiles.active:default}
+  docker:
+    compose:
+      file: D:\workspace\project\structura\structura-docker\docker-compose.yml
+
+---
+spring:
+  config:
+    activate:
+      on-profile: default
+  data:
+    mongodb:
+      uri: mongodb://structura:structura2025@mongo-router:27017/structura_db?replicaSet=shard1ReplSet,shard2ReplSet&readPreference=primaryPreferred

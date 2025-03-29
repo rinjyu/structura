@@ -1,1 +1,41 @@
-spring.application.name=structura-config
+spring:
+  application:
+    name: structura-config
+  profiles:
+    active: ${spring.profiles.active:native}
+  cloud:
+    config:
+      server:
+        fail-on-composite-error: false
+
+server:
+  servlet:
+    context-path: /config
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    shutdown:
+      enabled: true
+    health:
+      probes:
+        enabled: true
+
+---
+server:
+  port: 8081
+
+spring:
+  config:
+    activate:
+      on-profile: native
+    cloud:
+      config:
+        server:
+          native:
+            order: 1
+            search-locations: classpath:config/{application}
+

@@ -1,1 +1,38 @@
-spring.application.name=structura-command
+spring:
+  application:
+    name: structura-command
+  profiles:
+    active: ${spring.profiles.active:default}
+  cloud:
+    config:
+      name: ${spring.application.name}
+      profile: ${spring.profiles.active}
+      fail-fast: true
+      server:
+        fail-on-composite-error: false
+
+server:
+  servlet:
+    context-path: /command
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    shutdown:
+      enabled: true
+    health:
+      probes:
+        enabled: true
+
+---
+server:
+  port: 8083
+
+spring:
+  config:
+    activate:
+      on-profile: default
+    import: optional:configserver:http://localhost:8081/config

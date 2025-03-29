@@ -47,3 +47,12 @@ dependencyManagement {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+bootRun {
+	String activeProfile = project.findProperty("spring.profiles.active") ?: "default"
+	systemProperty "spring.profiles.active", activeProfile
+}
+
+bootJar {
+	mainClass = 'com.structura.config.StructuraConfigApplication'
+}

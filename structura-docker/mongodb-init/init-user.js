@@ -5,7 +5,7 @@ db = db.getSiblingDB("admin");
 if (db.getUsers().length === 0) {
   db.createUser({
     user: "admin",
-    pwd: "adminpassword",  // 적절한 비밀번호 설정
+    pwd: "admin2025",
     roles: [
       { role: "root", db: "admin" }
     ]
@@ -16,14 +16,14 @@ if (db.getUsers().length === 0) {
 }
 
 // ✅ MongoDB 클러스터에 필요한 사용자 생성
-db = db.getSiblingDB("structura"); // structura 데이터베이스로 전환
+db = db.getSiblingDB("structura");
 
 if (db.getUsers().length === 0) {
   db.createUser({
-    user: "structuraUser",
-    pwd: "userpassword",  // 적절한 비밀번호 설정
+    user: "structura",
+    pwd: "structura2025",
     roles: [
       { role: "readWrite", db: "structura" }
     ]
   });
-  print("✅ structura 데이터베이스 사용자(structuraUser) 생성 완료
+  print("✅ structura 데이터베이스 사용자(structura) 생성 완료

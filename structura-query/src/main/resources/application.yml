@@ -1,1 +1,38 @@
-spring.application.name=structura-query
+spring:
+  application:
+    name: structura-query
+  profiles:
+    active: ${spring.profiles.active:default}
+  cloud:
+    config:
+      name: ${spring.application.name}
+      profile: ${spring.profiles.active}
+      fail-fast: true
+      server:
+        fail-on-composite-error: false
+
+server:
+  servlet:
+    context-path: /query
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    shutdown:
+      enabled: true
+    health:
+      probes:
+        enabled: true
+
+---
+server:
+  port: 8082
+
+spring:
+  config:
+    activate:
+      on-profile: default
+    import: optional:configserver:http://localhost:8081/config
